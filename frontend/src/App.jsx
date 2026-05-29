@@ -1,20 +1,16 @@
 import { useState } from "react";
-import UploadBox from "./components/UploadBox";
 
 export default function App() {
-  const [file, setFile] = useState(null);
+  const [resume, setResume] = useState(null);
   const [jobDesc, setJobDesc] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!file) {
-      alert("Please upload a resume");
-      return;
-    }
+    if (!resume) return alert("Upload resume first");
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", resume);
     formData.append("job_description", jobDesc);
 
     setLoading(true);
@@ -29,48 +25,45 @@ export default function App() {
       setResult(data);
     } catch (err) {
       console.error(err);
-      alert("Backend connection error");
+      alert("Error connecting to backend");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center p-10">
+    <div style={styles.container}>
+      <h1 style={styles.heading}>AI Resume Analyzer</h1>
 
-      <h1 className="text-4xl font-bold mb-6">
-        AI Resume Analyzer
-      </h1>
-
-      <div className="bg-neutral-900 p-6 rounded-2xl w-[420px] space-y-4">
-
-        <UploadBox onFileSelect={setFile} />
+      <div style={styles.card}>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => setResume(e.target.files[0])}
+          style={styles.input}
+        />
 
         <textarea
           placeholder="Paste Job Description..."
           value={jobDesc}
           onChange={(e) => setJobDesc(e.target.value)}
-          className="w-full p-3 bg-black border border-gray-600 rounded-lg focus:outline-none"
+          style={styles.textarea}
         />
 
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-white text-black py-2 rounded-lg font-semibold hover:opacity-80 transition"
-        >
+        <button onClick={handleSubmit} style={styles.button}>
           {loading ? "Analyzing..." : "Analyze Resume"}
         </button>
       </div>
 
       {result && (
-        <div className="mt-6 bg-neutral-900 p-6 rounded-2xl w-[420px]">
-          <h2 className="text-xl mb-2 font-semibold">Results</h2>
+        <div style={styles.resultCard}>
+          <h2>Results</h2>
+          <p><strong>ATS Score:</strong> {result.ats_score}%</p>
+          <p><strong>Match Score:</strong> {result.match_score}%</p>
 
-          <p>ATS Score: {result.ats_score}%</p>
-          <p>Match Score: {result.match_score}%</p>
-
-          <div className="mt-3">
-            <h3 className="font-semibold mb-1">Suggestions:</h3>
-            <ul className="list-disc ml-5 text-gray-300">
+          <div>
+            <h3>Suggestions:</h3>
+            <ul>
               {result.suggestions.map((s, i) => (
                 <li key={i}>{s}</li>
               ))}
@@ -81,3 +74,57 @@ export default function App() {
     </div>
   );
 }
+
+const styles = {
+  container: {
+    backgroundColor: "#000",
+    color: "#fff",
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "40px",
+    fontFamily: "Arial, sans-serif",
+  },
+  heading: {
+    fontSize: "32px",
+    marginBottom: "20px",
+  },
+  card: {
+    backgroundColor: "#111",
+    padding: "20px",
+    borderRadius: "10px",
+    width: "400px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+  },
+  input: {
+    padding: "10px",
+    backgroundColor: "#000",
+    color: "#fff",
+    border: "1px solid #444",
+  },
+  textarea: {
+    padding: "10px",
+    height: "120px",
+    backgroundColor: "#000",
+    color: "#fff",
+    border: "1px solid #444",
+  },
+  button: {
+    padding: "12px",
+    backgroundColor: "#fff",
+    color: "#000",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+  },
+  resultCard: {
+    marginTop: "30px",
+    backgroundColor: "#111",
+    padding: "20px",
+    borderRadius: "10px",
+    width: "400px",
+  },
+};
